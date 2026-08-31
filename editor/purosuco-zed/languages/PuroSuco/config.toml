@@ -1,5 +1,4 @@
-name = "PuroSuco"
-grammar = "c-sharp"
+name = "purosuco"
 path_suffixes = ["suco"]
 line_comments = ["// "]
 tab_size = 4
