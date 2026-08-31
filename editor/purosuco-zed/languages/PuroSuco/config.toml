@@ -1,4 +1,5 @@
 name = "purosuco"
+grammar = "purosuco"
 path_suffixes = ["suco"]
 line_comments = ["// "]
 tab_size = 4
