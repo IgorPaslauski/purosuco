@@ -1,17 +1,7 @@
-; PuroSuco Tree-sitter & Semantic Highlight Queries
+; PuroSuco Tree-sitter Highlight Queries
 
-; Keywords
-[
-  "AMOSTRADINHO"
-  "NA_MIÚDA"
-  "NA_MIUDA"
-  "SO_OS_DE_VERDADE"
-  "SO_NA_TEORIA"
-  "SEMPRE_FOI_ASSIM"
-  "NAO_MEXE"
-  "BROTOU"
-  "EU_MESMO"
-] @keyword.modifier
+(modifier) @keyword.modifier
+"TROPA" @keyword
 
 [
   "TA_CERTO_ISSO"
@@ -29,33 +19,25 @@
   "PERAI"
 ] @keyword.control
 
-; Tipos
-[
-  "PAPO"
-  "NUMERO"
-  "NUMERO_QUEBRADO"
-  "CONFERE"
-  "VOLTA_NADA"
-  "SEI_LA"
-  "TROPA"
-  "PAPO_RETO"
-] @type
+(type) @type
 
-; Literais booleanos e nulos
-[
-  "CONFIA"
-  "CONFIA_NAO"
-  "TEM_NADA_AI"
-] @constant.builtin
+(boolean) @constant.builtin
+(null_literal) @constant.builtin
 
-; Funções built-in
 [
   "MANDA_AI"
   "FALA_TU"
+  "BROTOU"
 ] @function.builtin
 
-; Atribuição e Operadores
+(function_declaration
+  name: (identifier) @function)
+
+(call_expression
+  (identifier) @function)
+
 "RECEBA" @keyword.operator
+
 [
   "+"
   "-"
@@ -69,7 +51,8 @@
   "<"
 ] @operator
 
-; Comentários e strings
 (comment) @comment
 (string) @string
 (number) @number
+(identifier) @variable
+

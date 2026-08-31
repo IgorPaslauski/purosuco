@@ -19,20 +19,9 @@
       ],
       "tab_size": 4,
       "hard_tabs": false
-    },
-    "purosuco": {
-      "language_servers": [
-        "purosuco-lsp",
-        "..."
-      ],
-      "tab_size": 4,
-      "hard_tabs": false
     }
   },
   "file_types": {
-    "purosuco": [
-      "suco"
-    ],
     "PuroSuco": [
       "suco"
     ]
