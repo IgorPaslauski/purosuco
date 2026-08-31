@@ -24,6 +24,9 @@
   "BROTOU"
 ] @function.builtin
 
+(class_declaration
+  name: (identifier) @type.class)
+
 (function_declaration
   name: (identifier) @function)
 
@@ -49,4 +52,3 @@
 (string) @string
 (number) @number
 (identifier) @variable
-

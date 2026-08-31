@@ -8,4 +8,4 @@ repository = "https://github.com/IgorPaslauski/purosuco"
 
 [grammars.purosuco]
 repository = "https://github.com/IgorPaslauski/tree-sitter-purosuco"
-rev = "f80ce6508920f4944c20779f8566aa0c1c2afd2e"
+rev = "6ebae72ea5dd3d4373facd3e15381bb25fb57dd3"
