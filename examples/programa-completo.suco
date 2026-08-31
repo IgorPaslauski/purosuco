@@ -1,0 +1,21 @@
+AMOSTRADINHO TROPA Programa {
+
+    AMOSTRADINHO SEMPRE_FOI_ASSIM NUMERO Soma(NUMERO a, NUMERO b) {
+        TOMA a + b;
+    }
+
+    AMOSTRADINHO SEMPRE_FOI_ASSIM VOLTA_NADA Main() {
+
+        NUMERO idade RECEBA 23;
+        NUMERO resultado RECEBA Soma(10, 20);
+
+        TA_CERTO_ISSO idade >= 18 {
+            MANDA_AI("RECEBA!");
+        }
+        NAO_TA_NAO {
+            MANDA_AI("Aí não.");
+        }
+
+        MANDA_AI(resultado);
+    }
+}

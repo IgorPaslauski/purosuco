@@ -1,0 +1,34 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "🥤 PuroSuco: traduzir exemplo",
+      "type": "shell",
+      "command": "dotnet",
+      "args": [
+        "run",
+        "--project",
+        "src/PuroSuco.Cli",
+        "--",
+        "traduz",
+        "examples/hello.suco"
+      ],
+      "group": "build",
+      "problemMatcher": []
+    },
+    {
+      "label": "🥤 PuroSuco: tokens",
+      "type": "shell",
+      "command": "dotnet",
+      "args": [
+        "run",
+        "--project",
+        "src/PuroSuco.Cli",
+        "--",
+        "tokens",
+        "examples/hello.suco"
+      ],
+      "problemMatcher": []
+    }
+  ]
+}

@@ -1,0 +1,29 @@
+{
+  "lsp": {
+    "purosuco-lsp": {
+      "binary": {
+        "path": "dotnet",
+        "arguments": [
+          "run",
+          "--project",
+          "src/PuroSuco.LanguageServer/PuroSuco.LanguageServer.csproj"
+        ]
+      }
+    }
+  },
+  "languages": {
+    "PuroSuco": {
+      "language_servers": [
+        "purosuco-lsp",
+        "..."
+      ],
+      "tab_size": 4,
+      "hard_tabs": false
+    }
+  },
+  "file_types": {
+    "PuroSuco": [
+      "suco"
+    ]
+  }
+}

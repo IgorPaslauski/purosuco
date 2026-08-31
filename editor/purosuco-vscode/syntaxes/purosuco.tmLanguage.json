@@ -1,0 +1,124 @@
+{
+  "$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+  "name": "PuroSuco",
+  "scopeName": "source.purosuco",
+  "patterns": [
+    {
+      "include": "#comments"
+    },
+    {
+      "include": "#strings"
+    },
+    {
+      "include": "#numbers"
+    },
+    {
+      "include": "#types"
+    },
+    {
+      "include": "#control"
+    },
+    {
+      "include": "#modifiers"
+    },
+    {
+      "include": "#literals"
+    },
+    {
+      "include": "#functions"
+    },
+    {
+      "include": "#operators"
+    }
+  ],
+  "repository": {
+    "comments": {
+      "patterns": [
+        {
+          "name": "comment.line.double-slash.purosuco",
+          "match": "//.*$"
+        },
+        {
+          "name": "comment.block.purosuco",
+          "begin": "/\\*",
+          "end": "\\*/"
+        }
+      ]
+    },
+    "strings": {
+      "patterns": [
+        {
+          "name": "string.quoted.double.purosuco",
+          "begin": "\"",
+          "end": "\"",
+          "patterns": [
+            {
+              "name": "constant.character.escape.purosuco",
+              "match": "\\\\."
+            }
+          ]
+        }
+      ]
+    },
+    "numbers": {
+      "patterns": [
+        {
+          "name": "constant.numeric.purosuco",
+          "match": "\\b\\d+(?:\\.\\d+)?\\b"
+        }
+      ]
+    },
+    "types": {
+      "patterns": [
+        {
+          "name": "storage.type.purosuco",
+          "match": "\\b(PAPO|NUMERO|NUMERO_QUEBRADO|CONFERE|VOLTA_NADA|SEI_LA|TROPA|PAPO_RETO)\\b"
+        }
+      ]
+    },
+    "control": {
+      "patterns": [
+        {
+          "name": "keyword.control.purosuco",
+          "match": "\\b(TA_CERTO_ISSO|NAO_TA_NAO|ENQUANTO_TANKAR|BORA_BILL|CHEGA|SEGUE_O_JOGO|VAI_DAR_BOM|METEU_ESSA|DE_QUALQUER_JEITO|AI_TU_ME_QUEBRA|TOMA|PERAI|JA_VAI)\\b"
+        }
+      ]
+    },
+    "modifiers": {
+      "patterns": [
+        {
+          "name": "storage.modifier.purosuco",
+          "match": "\\b(AMOSTRADINHO|NA_MIÚDA|NA_MIUDA|SO_OS_DE_VERDADE|SO_NA_TEORIA|SEMPRE_FOI_ASSIM|NAO_MEXE)\\b"
+        }
+      ]
+    },
+    "literals": {
+      "patterns": [
+        {
+          "name": "constant.language.purosuco",
+          "match": "\\b(CONFIA|CONFIA_NAO|TEM_NADA_AI|EU_MESMO)\\b"
+        }
+      ]
+    },
+    "functions": {
+      "patterns": [
+        {
+          "name": "support.function.purosuco",
+          "match": "\\b(MANDA_AI|BROTOU)\\b"
+        }
+      ]
+    },
+    "operators": {
+      "patterns": [
+        {
+          "name": "keyword.operator.assignment.purosuco",
+          "match": "\\bRECEBA\\b"
+        },
+        {
+          "name": "keyword.operator.purosuco",
+          "match": "(==|!=|>=|<=|>|<|\\+|-|\\*|/)"
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,11 @@
+AMOSTRADINHO TROPA Diagnosticos {
+
+    AMOSTRADINHO SEMPRE_FOI_ASSIM VOLTA_NADA Main() {
+
+        NUMERO idade RECEBA "vinte";
+
+        salario RECEBA 5000;
+
+        NUMERO resultado RECEBA 10 / 0;
+    }
+}

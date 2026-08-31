@@ -1,0 +1,58 @@
+[
+  {
+    "label": "🥤 PuroSuco: Rodar arquivo atual (roda)",
+    "command": "dotnet",
+    "args": [
+      "run",
+      "--project",
+      "src/PuroSuco.Cli/PuroSuco.Cli.csproj",
+      "--",
+      "roda",
+      "$ZED_FILE"
+    ],
+    "use_new_terminal": false,
+    "allow_concurrent_runs": false
+  },
+  {
+    "label": "🥤 PuroSuco: Traduzir pra C# (traduz)",
+    "command": "dotnet",
+    "args": [
+      "run",
+      "--project",
+      "src/PuroSuco.Cli/PuroSuco.Cli.csproj",
+      "--",
+      "traduz",
+      "$ZED_FILE"
+    ],
+    "use_new_terminal": false,
+    "allow_concurrent_runs": false
+  },
+  {
+    "label": "🥤 PuroSuco: Verificar erros (check)",
+    "command": "dotnet",
+    "args": [
+      "run",
+      "--project",
+      "src/PuroSuco.Cli/PuroSuco.Cli.csproj",
+      "--",
+      "check",
+      "$ZED_FILE"
+    ],
+    "use_new_terminal": false,
+    "allow_concurrent_runs": false
+  },
+  {
+    "label": "🥤 PuroSuco: Formatar arquivo (formata)",
+    "command": "dotnet",
+    "args": [
+      "run",
+      "--project",
+      "src/PuroSuco.Cli/PuroSuco.Cli.csproj",
+      "--",
+      "formata",
+      "$ZED_FILE"
+    ],
+    "use_new_terminal": false,
+    "allow_concurrent_runs": false
+  }
+]

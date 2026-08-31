@@ -1,0 +1,98 @@
+{
+  "name": "purosuco-language",
+  "displayName": "PuroSuco Language",
+  "description": "Suporte para a linguagem PuroSuco — a linguagem que compila o Brasil.",
+  "version": "0.1.0",
+  "publisher": "IgorPaslauski",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/IgorPaslauski/purosuco"
+  },
+  "license": "MIT",
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": [
+    "Programming Languages",
+    "Snippets"
+  ],
+  "activationEvents": [
+    "onLanguage:purosuco"
+  ],
+  "main": "./extension.js",
+  "contributes": {
+    "languages": [
+      {
+        "id": "purosuco",
+        "aliases": [
+          "PuroSuco",
+          "purosuco"
+        ],
+        "extensions": [
+          ".suco"
+        ],
+        "configuration": "./language-configuration.json"
+      }
+    ],
+    "grammars": [
+      {
+        "language": "purosuco",
+        "scopeName": "source.purosuco",
+        "path": "./syntaxes/purosuco.tmLanguage.json"
+      }
+    ],
+    "snippets": [
+      {
+        "language": "purosuco",
+        "path": "./snippets/purosuco.json"
+      }
+    ],
+    "commands": [
+      {
+        "command": "purosuco.run",
+        "title": "PuroSuco: Rodar a Resenha"
+      },
+      {
+        "command": "purosuco.transpile",
+        "title": "PuroSuco: Traduzir pra C#"
+      },
+      {
+        "command": "purosuco.keywords",
+        "title": "PuroSuco: Ver Dicionário de Memes"
+      }
+    ],
+    "menus": {
+      "editor/title": [
+        {
+          "command": "purosuco.run",
+          "when": "editorLangId == purosuco",
+          "group": "navigation@1"
+        },
+        {
+          "command": "purosuco.transpile",
+          "when": "editorLangId == purosuco",
+          "group": "navigation@2"
+        }
+      ]
+    },
+    "configuration": {
+      "title": "PuroSuco",
+      "properties": {
+        "purosuco.format.enable": {
+          "type": "boolean",
+          "default": true,
+          "description": "Ativa o formatter oficial PuroSuco."
+        }
+      }
+    }
+  },
+  "dependencies": {
+    "vscode-languageclient": "^9.0.1"
+  },
+  "scripts": {
+    "package": "vsce package"
+  },
+  "devDependencies": {
+    "@vscode/vsce": "^3.2.1"
+  }
+}

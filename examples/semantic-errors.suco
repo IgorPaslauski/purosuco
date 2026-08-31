@@ -1,0 +1,9 @@
+NUMERO idade RECEBA "vinte";
+
+salario RECEBA 5000;
+
+NUMERO resultado RECEBA 10 / 0;
+
+TA_CERTO_ISSO idade {
+    MANDA_AI("deu ruim");
+}

@@ -1,0 +1,14 @@
+AMOSTRADINHO TROPA Programa {
+
+    AMOSTRADINHO SEMPRE_FOI_ASSIM VOLTA_NADA Main() {
+
+        NUMERO idade RECEBA 23;
+
+        TA_CERTO_ISSO idade >= 18 {
+            MANDA_AI("RECEBA!");
+        }
+        NAO_TA_NAO {
+            MANDA_AI("Aí não.");
+        }
+    }
+}

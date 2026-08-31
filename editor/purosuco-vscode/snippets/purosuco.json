@@ -1,0 +1,70 @@
+{
+  "Programa PuroSuco": {
+    "prefix": "programa",
+    "body": [
+      "AMOSTRADINHO TROPA Programa {",
+      "",
+      "    AMOSTRADINHO SEMPRE_FOI_ASSIM VOLTA_NADA Main() {",
+      "        $0",
+      "    }",
+      "}"
+    ],
+    "description": "Cria o programa principal PuroSuco"
+  },
+  "Tá certo isso": {
+    "prefix": "if",
+    "body": [
+      "TA_CERTO_ISSO ${1:condicao} {",
+      "    $0",
+      "}"
+    ],
+    "description": "if — TA_CERTO_ISSO"
+  },
+  "Tá certo isso senão": {
+    "prefix": "ifelse",
+    "body": [
+      "TA_CERTO_ISSO ${1:condicao} {",
+      "    ${2}",
+      "}",
+      "NAO_TA_NAO {",
+      "    $0",
+      "}"
+    ],
+    "description": "if/else PuroSuco"
+  },
+  "Receba": {
+    "prefix": "receba",
+    "body": [
+      "${1:variavel} RECEBA ${2:valor};"
+    ],
+    "description": "Atribuição"
+  },
+  "Manda aí": {
+    "prefix": "print",
+    "body": [
+      "MANDA_AI(${1:\"RECEBA!\"});"
+    ],
+    "description": "Imprime no console"
+  },
+  "Vai dar bom": {
+    "prefix": "try",
+    "body": [
+      "VAI_DAR_BOM {",
+      "    ${1}",
+      "}",
+      "METEU_ESSA erro {",
+      "    $0",
+      "}"
+    ],
+    "description": "try/catch PuroSuco"
+  },
+  "Enquanto tankar": {
+    "prefix": "while",
+    "body": [
+      "ENQUANTO_TANKAR ${1:condicao} {",
+      "    $0",
+      "}"
+    ],
+    "description": "while PuroSuco"
+  }
+}
