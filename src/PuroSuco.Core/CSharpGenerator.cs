@@ -91,6 +91,38 @@ public sealed class CSharpGenerator
                 WriteBlock(w.Body);
                 break;
 
+            case ForStatementSyntax forStmt:
+                WriteIndent();
+                _sb.Append("for (");
+                if (forStmt.Initializer is not null)
+                {
+                    if (forStmt.Initializer is VariableDeclarationSyntax v)
+                        _sb.Append($"{MapType(v.TypeName)} {v.Identifier}{(v.Initializer is not null ? $" = {WriteExpression(v.Initializer)}" : "")}; ");
+                    else if (forStmt.Initializer is AssignmentStatementSyntax a)
+                        _sb.Append($"{a.Identifier} = {WriteExpression(a.Expression)}; ");
+                    else if (forStmt.Initializer is ExpressionStatementSyntax es)
+                        _sb.Append($"{WriteExpression(es.Expression)}; ");
+                }
+                else
+                {
+                    _sb.Append("; ");
+                }
+
+                if (forStmt.Condition is not null)
+                    _sb.Append(WriteExpression(forStmt.Condition));
+                _sb.Append("; ");
+
+                if (forStmt.Increment is not null)
+                {
+                    if (forStmt.Increment is AssignmentStatementSyntax a)
+                        _sb.Append($"{a.Identifier} = {WriteExpression(a.Expression)}");
+                    else if (forStmt.Increment is ExpressionStatementSyntax es)
+                        _sb.Append(WriteExpression(es.Expression));
+                }
+                _sb.AppendLine(")");
+                WriteBlock(forStmt.Body);
+                break;
+
             case ReturnStatementSyntax r:
                 WriteIndent();
                 _sb.Append("return");
@@ -133,8 +165,12 @@ public sealed class CSharpGenerator
         _ => literal.Value?.ToString() ?? "null"
     };
 
-    private static string MapCall(string name) =>
-        name.Equals("MANDA_AI", StringComparison.OrdinalIgnoreCase) ? "Console.WriteLine" : name;
+    private static string MapCall(string name) => name.ToUpperInvariant() switch
+    {
+        "MANDA_AI" => "Console.WriteLine",
+        "FALA_TU" => "Console.ReadLine",
+        _ => name
+    };
 
     private static string MapType(string type) => type.ToUpperInvariant() switch
     {

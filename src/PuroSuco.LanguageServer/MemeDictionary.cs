@@ -39,6 +39,7 @@ public static class MemeDictionary
             ["NUMERO_QUEBRADO"] = ("double", "Número decimal."),
             ["CONFERE"] = ("bool", "Booleano."),
             ["RECEBA"] = ("=", "Atribui um valor."),
-            ["MANDA_AI"] = ("Console.WriteLine", "Joga a informação no console.")
+            ["MANDA_AI"] = ("Console.WriteLine", "Joga a informação no console."),
+            ["FALA_TU"] = ("Console.ReadLine", "Lê uma linha de texto digitada pelo usuário.")
         };
 }

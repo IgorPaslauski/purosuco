@@ -121,6 +121,42 @@ public sealed class Formatter
                 _sb.AppendLine("}");
                 break;
 
+            case ForStatementSyntax forStmt:
+                WriteIndent();
+                _sb.Append("BORA_BILL (");
+                if (forStmt.Initializer is not null)
+                {
+                    if (forStmt.Initializer is VariableDeclarationSyntax v)
+                        _sb.Append($"{v.TypeName} {v.Identifier}{(v.Initializer is not null ? $" RECEBA {WriteExpression(v.Initializer)}" : "")}; ");
+                    else if (forStmt.Initializer is AssignmentStatementSyntax a)
+                        _sb.Append($"{a.Identifier} RECEBA {WriteExpression(a.Expression)}; ");
+                    else if (forStmt.Initializer is ExpressionStatementSyntax es)
+                        _sb.Append($"{WriteExpression(es.Expression)}; ");
+                }
+                else
+                {
+                    _sb.Append("; ");
+                }
+
+                if (forStmt.Condition is not null)
+                    _sb.Append(WriteExpression(forStmt.Condition));
+                _sb.Append("; ");
+
+                if (forStmt.Increment is not null)
+                {
+                    if (forStmt.Increment is AssignmentStatementSyntax a)
+                        _sb.Append($"{a.Identifier} RECEBA {WriteExpression(a.Expression)}");
+                    else if (forStmt.Increment is ExpressionStatementSyntax es)
+                        _sb.Append(WriteExpression(es.Expression));
+                }
+                _sb.AppendLine(") {");
+                _indent++;
+                foreach (var s in forStmt.Body.Statements) WriteStatement(s);
+                _indent--;
+                WriteIndent();
+                _sb.AppendLine("}");
+                break;
+
             case ReturnStatementSyntax r:
                 WriteIndent();
                 _sb.Append("TOMA");

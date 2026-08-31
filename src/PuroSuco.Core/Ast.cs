@@ -63,6 +63,13 @@ public sealed record WhileStatementSyntax(
     BlockStatementSyntax Body,
     int Position) : StatementSyntax(Position);
 
+public sealed record ForStatementSyntax(
+    StatementSyntax? Initializer,
+    ExpressionSyntax? Condition,
+    StatementSyntax? Increment,
+    BlockStatementSyntax Body,
+    int Position) : StatementSyntax(Position);
+
 public sealed record ReturnStatementSyntax(
     ExpressionSyntax? Expression,
     int Position) : StatementSyntax(Position);

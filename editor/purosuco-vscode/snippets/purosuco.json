@@ -66,5 +66,21 @@
       "}"
     ],
     "description": "while PuroSuco"
+  },
+  "Bora Bill": {
+    "prefix": "for",
+    "body": [
+      "BORA_BILL (NUMERO ${1:i} RECEBA 0; ${1:i} < ${2:10}; ${1:i} RECEBA ${1:i} + 1) {",
+      "    $0",
+      "}"
+    ],
+    "description": "for PuroSuco"
+  },
+  "Fala Tu": {
+    "prefix": "input",
+    "body": [
+      "PAPO ${1:entrada} RECEBA FALA_TU();"
+    ],
+    "description": "Lê entrada do usuário via teclado"
   }
 }

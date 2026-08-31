@@ -1,6 +1,5 @@
 name = "PuroSuco"
-# Ative quando a grammar tree-sitter-purosuco existir:
-# grammar = "purosuco"
+grammar = "c-sharp"
 path_suffixes = ["suco"]
 line_comments = ["// "]
 tab_size = 4

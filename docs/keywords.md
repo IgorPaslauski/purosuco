@@ -36,3 +36,4 @@
 | bool | CONFERE | booleano |
 | double | NUMERO_QUEBRADO | decimal |
 | print | MANDA_AI | saída |
+| read | FALA_TU | entrada do usuário |

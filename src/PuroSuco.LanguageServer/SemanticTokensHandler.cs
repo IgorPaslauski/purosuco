@@ -13,10 +13,16 @@ public sealed class SemanticTokensHandler : SemanticTokensHandlerBase
 
     private static readonly SemanticTokenType[] Types =
     [
+        SemanticTokenType.Keyword,
+        SemanticTokenType.Type,
         SemanticTokenType.Class,
         SemanticTokenType.Function,
         SemanticTokenType.Variable,
-        SemanticTokenType.Parameter
+        SemanticTokenType.Parameter,
+        SemanticTokenType.String,
+        SemanticTokenType.Number,
+        SemanticTokenType.Operator,
+        SemanticTokenType.Comment
     ];
 
     public SemanticTokensHandler(DocumentStore store, SemanticDocumentService semantic)
@@ -56,30 +62,78 @@ public sealed class SemanticTokensHandler : SemanticTokensHandlerBase
     {
         var uri = identifier.TextDocument.Uri;
         var text = _store.Get(uri.ToString());
-        var model = _semantic.GetModel(text);
-
-        if (model is null)
+        if (string.IsNullOrEmpty(text))
             return Task.CompletedTask;
 
-        foreach (var symbol in model.Symbols)
+        IReadOnlyList<Token> tokens;
+        try
         {
-            var position = TextUtilities.ToPosition(text, symbol.Position);
-            var tokenType = symbol.Kind switch
-            {
-                SymbolKind.Class => SemanticTokenType.Class,
-                SymbolKind.Function => SemanticTokenType.Function,
-                SymbolKind.Parameter => SemanticTokenType.Parameter,
-                _ => SemanticTokenType.Variable
-            };
+            tokens = new Lexer(text).Lex();
+        }
+        catch
+        {
+            return Task.CompletedTask;
+        }
 
-            builder.Push(
-                position.Line,
-                position.Character,
-                Math.Max(1, symbol.Name.Length),
-                tokenType,
-                Array.Empty<SemanticTokenModifier>());
+        var model = _semantic.GetModel(text);
+        var symbolMap = model?.Symbols
+            .ToLookup(s => s.Position, s => s) ?? null;
+
+        foreach (var token in tokens)
+        {
+            if (token.Kind == TokenKind.EndOfFile || token.Text.Length == 0)
+                continue;
+
+            var position = TextUtilities.ToPosition(text, token.Position);
+            var tokenType = ClassifyToken(token, symbolMap);
+
+            if (tokenType is not null)
+            {
+                builder.Push(
+                    position.Line,
+                    position.Character,
+                    token.Text.Length,
+                    tokenType.Value,
+                    Array.Empty<SemanticTokenModifier>());
+            }
         }
 
         return Task.CompletedTask;
+    }
+
+    private static SemanticTokenType? ClassifyToken(Token token, ILookup<int, Symbol>? symbols)
+    {
+        if (symbols != null && symbols.Contains(token.Position))
+        {
+            var symbol = symbols[token.Position].FirstOrDefault();
+            if (symbol != null)
+            {
+                return symbol.Kind switch
+                {
+                    SymbolKind.Class => SemanticTokenType.Class,
+                    SymbolKind.Function => SemanticTokenType.Function,
+                    SymbolKind.Parameter => SemanticTokenType.Parameter,
+                    _ => SemanticTokenType.Variable
+                };
+            }
+        }
+
+        if (token.Kind == TokenKind.Keyword)
+        {
+            var t = token.Text.ToUpperInvariant();
+            if (t is "NUMERO" or "NUMERO_QUEBRADO" or "PAPO" or "CONFERE" or "SEI_LA" or "VOLTA_NADA" or "TROPA")
+                return SemanticTokenType.Type;
+
+            return SemanticTokenType.Keyword;
+        }
+
+        return token.Kind switch
+        {
+            TokenKind.Number => SemanticTokenType.Number,
+            TokenKind.String => SemanticTokenType.String,
+            TokenKind.Operator => SemanticTokenType.Operator,
+            TokenKind.Identifier => SemanticTokenType.Variable,
+            _ => null
+        };
     }
 }

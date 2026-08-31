@@ -70,6 +70,7 @@ public class Programa
 | `int` | `NUMERO` |
 | `bool` | `CONFERE` |
 | `print` | `MANDA_AI` |
+| `read` | `FALA_TU` |
 
 ## Rodando
 
@@ -92,16 +93,15 @@ dotnet run --project src/PuroSuco.Cli -- tokens examples/hello.suco
 
 - [x] Lexer inicial
 - [x] Keywords meme
-- [x] Transpilação inicial para C#
+- [x] Transpilação para C#
 - [x] CLI
-- [ ] Parser + AST próprios
-- [ ] Diagnósticos semânticos
-- [ ] Runner
-- [ ] Formatter
-- [ ] Language Server Protocol
-- [ ] Extensão VS Code
-- [ ] Editor próprio com Monaco
-- [ ] Tradução PuroSuco ↔ C# em tempo real
+- [x] Parser + AST próprios (com loops BORA_BILL e ENQUANTO_TANKAR)
+- [x] Diagnósticos semânticos
+- [x] Runner
+- [x] Formatter
+- [x] Language Server Protocol (LSP com Semantic Tokens para Zed/VS Code)
+- [x] Extensão VS Code / Cursor
+- [x] Integração com Zed (.zed/settings.json e tasks.json)
 
 ## Filosofia
 

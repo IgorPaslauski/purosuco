@@ -90,6 +90,7 @@ public sealed class Parser
     {
         if (MatchKeyword("TA_CERTO_ISSO")) return ParseIf();
         if (MatchKeyword("ENQUANTO_TANKAR")) return ParseWhile();
+        if (MatchKeyword("BORA_BILL")) return ParseFor();
         if (MatchKeyword("TOMA")) return ParseReturn();
 
         if (MatchKeyword("CHEGA"))
@@ -160,6 +161,55 @@ public sealed class Parser
         var condition = ParseExpression();
         var body = ParseBlock();
         return new WhileStatementSyntax(condition, body, pos);
+    }
+
+    private ForStatementSyntax ParseFor()
+    {
+        var pos = Previous.Position;
+        var hasParen = MatchOptional(TokenKind.OpenParen);
+
+        StatementSyntax? initializer = null;
+        if (Current.Kind != TokenKind.Semicolon)
+        {
+            if (IsTypeKeyword(Current.Text))
+                initializer = ParseVariableDeclaration();
+            else if (Current.Kind == TokenKind.Identifier && Peek(1).Kind == TokenKind.Keyword && Peek(1).Text.Equals("RECEBA", StringComparison.OrdinalIgnoreCase))
+                initializer = ParseAssignment();
+            else
+            {
+                var expr = ParseExpression();
+                ConsumeOptional(TokenKind.Semicolon);
+                initializer = new ExpressionStatementSyntax(expr, expr.Position);
+            }
+        }
+        else
+        {
+            Advance();
+        }
+
+        ExpressionSyntax? condition = null;
+        if (Current.Kind != TokenKind.Semicolon)
+            condition = ParseExpression();
+        ConsumeOptional(TokenKind.Semicolon);
+
+        StatementSyntax? increment = null;
+        if (Current.Kind != TokenKind.CloseParen && Current.Kind != TokenKind.OpenBrace)
+        {
+            if (Current.Kind == TokenKind.Identifier && Peek(1).Kind == TokenKind.Keyword && Peek(1).Text.Equals("RECEBA", StringComparison.OrdinalIgnoreCase))
+                increment = ParseAssignment();
+            else
+            {
+                var expr = ParseExpression();
+                ConsumeOptional(TokenKind.Semicolon);
+                increment = new ExpressionStatementSyntax(expr, expr.Position);
+            }
+        }
+
+        if (hasParen)
+            Consume(TokenKind.CloseParen, "PS109", "FECHA O PAPO", "Esperava ')' no BORA_BILL.");
+
+        var body = ParseBlock();
+        return new ForStatementSyntax(initializer, condition, increment, body, pos);
     }
 
     private ReturnStatementSyntax ParseReturn()
@@ -251,6 +301,12 @@ public sealed class Parser
         }
 
         if (token.Kind == TokenKind.Keyword && token.Text.Equals("MANDA_AI", StringComparison.OrdinalIgnoreCase))
+        {
+            Advance();
+            return ParseCall(token.Text, token.Position);
+        }
+
+        if (token.Kind == TokenKind.Keyword && token.Text.Equals("FALA_TU", StringComparison.OrdinalIgnoreCase))
         {
             Advance();
             return ParseCall(token.Text, token.Position);
@@ -356,6 +412,16 @@ public sealed class Parser
     {
         if (Current.Kind == kind) return Advance();
         throw new PuroSucoException(code, title, message, Current.Position);
+    }
+
+    private bool MatchOptional(TokenKind kind)
+    {
+        if (Current.Kind == kind)
+        {
+            Advance();
+            return true;
+        }
+        return false;
     }
 
     private void ConsumeOptional(TokenKind kind)

@@ -39,8 +39,11 @@ public static class Keywords
             ["CONFERE"] = "bool",
             ["NUMERO_QUEBRADO"] = "double",
             ["RECEBA"] = "=",
+            ["FALA_TU"] = "Console.ReadLine",
         };
 
     public static bool IsKeyword(string text) =>
-        ToCSharp.ContainsKey(text) || text.Equals("MANDA_AI", StringComparison.OrdinalIgnoreCase);
+        ToCSharp.ContainsKey(text) ||
+        text.Equals("MANDA_AI", StringComparison.OrdinalIgnoreCase) ||
+        text.Equals("FALA_TU", StringComparison.OrdinalIgnoreCase);
 }

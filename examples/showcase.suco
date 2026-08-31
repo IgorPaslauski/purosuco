@@ -1,0 +1,32 @@
+AMOSTRADINHO TROPA ProgramaCompleto {
+
+    AMOSTRADINHO SEMPRE_FOI_ASSIM NUMERO Multiplica(NUMERO a, NUMERO b) {
+        TOMA a * b;
+    }
+
+    AMOSTRADINHO SEMPRE_FOI_ASSIM VOLTA_NADA Main() {
+
+        MANDA_AI("🥤 === PUROSUCO COMPILER BRASIL === 🥤");
+
+        NUMERO contador RECEBA 0;
+        MANDA_AI("--- Testando ENQUANTO_TANKAR (while) ---");
+        ENQUANTO_TANKAR contador < 3 {
+            MANDA_AI("Tankando loop:");
+            MANDA_AI(contador);
+            contador RECEBA contador + 1;
+        }
+
+        MANDA_AI("--- Testando BORA_BILL (for) ---");
+        BORA_BILL (NUMERO i RECEBA 1; i <= 3; i RECEBA i + 1) {
+            NUMERO mult RECEBA Multiplica(i, 10);
+            MANDA_AI(mult);
+        }
+
+        TA_CERTO_ISSO contador >= 3 {
+            MANDA_AI("RECEBA! Teste concluido com sucesso.");
+        }
+        NAO_TA_NAO {
+            MANDA_AI("Aí não.");
+        }
+    }
+}

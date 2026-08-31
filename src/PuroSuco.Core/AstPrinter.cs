@@ -36,6 +36,7 @@ public static class AstPrinter
         CallExpressionSyntax c => $"Call {c.Name}",
         IfStatementSyntax => "If",
         WhileStatementSyntax => "While",
+        ForStatementSyntax => "For (BORA_BILL)",
         ReturnStatementSyntax => "Return",
         BlockStatementSyntax => "Block",
         BreakStatementSyntax => "Break",
@@ -81,6 +82,12 @@ public static class AstPrinter
             case WhileStatementSyntax w:
                 yield return w.Condition;
                 yield return w.Body;
+                break;
+            case ForStatementSyntax forStmt:
+                if (forStmt.Initializer is not null) yield return forStmt.Initializer;
+                if (forStmt.Condition is not null) yield return forStmt.Condition;
+                if (forStmt.Increment is not null) yield return forStmt.Increment;
+                yield return forStmt.Body;
                 break;
             case ReturnStatementSyntax r when r.Expression is not null:
                 yield return r.Expression;

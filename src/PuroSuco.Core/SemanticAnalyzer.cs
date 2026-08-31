@@ -122,6 +122,15 @@ public sealed class SemanticAnalyzer
                 AnalyzeBlock(@while.Body);
                 break;
 
+            case ForStatementSyntax @for:
+                PushScope();
+                if (@for.Initializer is not null) AnalyzeStatement(@for.Initializer);
+                if (@for.Condition is not null) AnalyzeCondition(@for.Condition, @for.Position);
+                if (@for.Increment is not null) AnalyzeStatement(@for.Increment);
+                AnalyzeBlock(@for.Body);
+                PopScope();
+                break;
+
             case ReturnStatementSyntax ret:
                 AnalyzeReturn(ret);
                 break;
@@ -214,6 +223,9 @@ public sealed class SemanticAnalyzer
 
                 if (call.Name.Equals("MANDA_AI", StringComparison.OrdinalIgnoreCase))
                     return "void";
+
+                if (call.Name.Equals("FALA_TU", StringComparison.OrdinalIgnoreCase))
+                    return "string";
 
                 if (_functions.TryGetValue(call.Name, out var fn))
                 {
