@@ -1,0 +1,35 @@
+CHAMA System;
+
+AMOSTRADINHO TROPA ServicoPagamento {
+
+    AMOSTRADINHO SEMPRE_FOI_ASSIM VOLTA_NADA ProcessarPix(GRANA valorPix, CONFERE chaveValida) {
+        VAI_DAR_BOM {
+            MANDA_AI("Iniciando transacao Pix...");
+
+            TA_CERTO_ISSO valorPix <= 0 {
+                AI_TU_ME_QUEBRA BROTOU Exception("Valor do Pix nao pode ser zero ou negativo!");
+            }
+
+            TA_CERTO_ISSO chaveValida == CONFIA_NAO {
+                AI_TU_ME_QUEBRA BROTOU Exception("Chave Pix informada nao existe no sistema!");
+            }
+
+            MANDA_AI("RECEBA! Pix no valor de R$ " + valorPix + " enviado com sucesso!");
+        }
+        DEU_RUIM (Exception ex) {
+            MANDA_AI("DEU RUIM no pagamento: " + ex.Message);
+        }
+        DE_QUALQUER_JEITO {
+            MANDA_AI("Auditoria: Tentativa de Pix finalizada.");
+        }
+    }
+
+    AMOSTRADINHO SEMPRE_FOI_ASSIM VOLTA_NADA Main() {
+        MANDA_AI("--- TESTANDO FLUXO DE PAGAMENTO PIX ---");
+        ProcessarPix(150, CONFIA);
+        MANDA_AI("");
+        ProcessarPix(-50, CONFIA);
+        MANDA_AI("");
+        ProcessarPix(500, CONFIA_NAO);
+    }
+}

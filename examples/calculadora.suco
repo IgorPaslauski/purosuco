@@ -1,0 +1,64 @@
+AMOSTRADINHO TROPA Calculadora {
+
+    AMOSTRADINHO SEMPRE_FOI_ASSIM NUMERO Somar(NUMERO a, NUMERO b) {
+        TOMA a + b;
+    }
+
+    AMOSTRADINHO SEMPRE_FOI_ASSIM NUMERO Subtrair(NUMERO a, NUMERO b) {
+        TOMA a - b;
+    }
+
+    AMOSTRADINHO SEMPRE_FOI_ASSIM NUMERO Multiplicar(NUMERO a, NUMERO b) {
+        TOMA a * b;
+    }
+
+    AMOSTRADINHO SEMPRE_FOI_ASSIM NUMERO Dividir(NUMERO a, NUMERO b) {
+        TA_CERTO_ISSO b == 0 {
+            MANDA_AI("ERRO: Tentou dividir por zero! Ai tu me quebra.");
+            TOMA 0;
+        }
+        TOMA a / b;
+    }
+
+    AMOSTRADINHO SEMPRE_FOI_ASSIM NUMERO Potencia(NUMERO baseNum, NUMERO expoente) {
+        NUMERO resultado RECEBA 1;
+        BORA_BILL (NUMERO i RECEBA 0; i < expoente; i RECEBA i + 1) {
+            resultado RECEBA resultado * baseNum;
+        }
+        TOMA resultado;
+    }
+
+    AMOSTRADINHO SEMPRE_FOI_ASSIM VOLTA_NADA Main() {
+        MANDA_AI("=== CALCULADORA DO PUROSUCO ===");
+
+        NUMERO n1 RECEBA 20;
+        NUMERO n2 RECEBA 4;
+
+        NUMERO soma RECEBA Somar(n1, n2);
+        NUMERO sub RECEBA Subtrair(n1, n2);
+        NUMERO mult RECEBA Multiplicar(n1, n2);
+        NUMERO div RECEBA Dividir(n1, n2);
+        NUMERO pot RECEBA Potencia(2, 8);
+
+        MANDA_AI("Soma de 20 + 4:");
+        MANDA_AI(soma);
+
+        MANDA_AI("Subtracao de 20 - 4:");
+        MANDA_AI(sub);
+
+        MANDA_AI("Multiplicacao de 20 * 4:");
+        MANDA_AI(mult);
+
+        MANDA_AI("Divisao de 20 / 4:");
+        MANDA_AI(div);
+
+        MANDA_AI("Potencia de 2 elevado a 8:");
+        MANDA_AI(pot);
+
+        MANDA_AI("Calculo composto: (20 + 4) * 2");
+        NUMERO composto RECEBA Multiplicar(soma, 2);
+        MANDA_AI(composto);
+
+        MANDA_AI("Fim dos calculos. RECEBA!");
+    }
+}

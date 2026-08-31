@@ -1,0 +1,81 @@
+AMOSTRADINHO TROPA QuizDev {
+
+    AMOSTRADINHO SEMPRE_FOI_ASSIM VOLTA_NADA Main() {
+        MANDA_AI("========================================");
+        MANDA_AI("🥤 QUIZ DO PROGRAMADOR PUROSUCO 🥤");
+        MANDA_AI("========================================");
+
+        MANDA_AI("Digite seu nickname dev:");
+        PAPO dev RECEBA FALA_TU();
+
+        MANDA_AI("Beleza, " + dev + "! Vamos ver se voce manja mesmo.");
+        NUMERO pontos RECEBA 0;
+
+        // Pergunta 1
+        MANDA_AI("");
+        MANDA_AI("1) Qual e a palavra-chave para classe no PuroSuco?");
+        MANDA_AI("a) CLASSE");
+        MANDA_AI("b) TROPA");
+        MANDA_AI("c) BONDE");
+        PAPO r1 RECEBA FALA_TU();
+
+        TA_CERTO_ISSO r1 == "b" {
+            MANDA_AI("RECEBA! Resposta certa!");
+            pontos RECEBA pontos + 10;
+        }
+        NAO_TA_NAO {
+            MANDA_AI("Errou feio, errou rude! A resposta era 'b' (TROPA).");
+        }
+
+        // Pergunta 2
+        MANDA_AI("");
+        MANDA_AI("2) O que a instrucao 'TOMA' faz?");
+        MANDA_AI("a) Retorna um valor da funcao (return)");
+        MANDA_AI("b) Imprime na tela");
+        MANDA_AI("c) Para o loop");
+        PAPO r2 RECEBA FALA_TU();
+
+        TA_CERTO_ISSO r2 == "a" {
+            MANDA_AI("Boa garoto! +10 pontos.");
+            pontos RECEBA pontos + 10;
+        }
+        NAO_TA_NAO {
+            MANDA_AI("Meteu essa? TOMA e o nosso return!");
+        }
+
+        // Pergunta 3
+        MANDA_AI("");
+        MANDA_AI("3) Qual e o booleano verdadeiro no PuroSuco?");
+        MANDA_AI("a) VERDADE");
+        MANDA_AI("b) CONFIA");
+        MANDA_AI("c) E_SIM");
+        PAPO r3 RECEBA FALA_TU();
+
+        TA_CERTO_ISSO r3 == "b" {
+            MANDA_AI("CONFIA no processo! +10 pontos.");
+            pontos RECEBA pontos + 10;
+        }
+        NAO_TA_NAO {
+            MANDA_AI("Ai tu me quebra... O certo e CONFIA.");
+        }
+
+        // Resultado Final
+        MANDA_AI("");
+        MANDA_AI("========================================");
+        MANDA_AI("PONTUACAO FINAL DE " + dev + ":");
+        MANDA_AI(pontos);
+        MANDA_AI("========================================");
+
+        TA_CERTO_ISSO pontos == 30 {
+            MANDA_AI("GABARITOU! Voce e AMOSTRADINHO DEMAIS!");
+        }
+        NAO_TA_NAO {
+            TA_CERTO_ISSO pontos >= 10 {
+                MANDA_AI("Foi bem, da pra tankar o mercado de trabalho!");
+            }
+            NAO_TA_NAO {
+                MANDA_AI("Zerou a resenha! Precisa estudar mais PuroSuco.");
+            }
+        }
+    }
+}

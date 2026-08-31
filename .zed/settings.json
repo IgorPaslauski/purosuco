@@ -2,12 +2,7 @@
   "lsp": {
     "purosuco-lsp": {
       "binary": {
-        "path": "dotnet",
-        "arguments": [
-          "run",
-          "--project",
-          "src/PuroSuco.LanguageServer/PuroSuco.LanguageServer.csproj"
-        ]
+        "path": "dist/purosuco-lsp.exe"
       }
     }
   },

@@ -1,0 +1,40 @@
+AMOSTRADINHO TROPA ConversorTemperatura {
+
+    AMOSTRADINHO SEMPRE_FOI_ASSIM NUMERO_QUEBRADO CelsiusParaFahrenheit(NUMERO_QUEBRADO c) {
+        TOMA (c * 1.8) + 32.0;
+    }
+
+    AMOSTRADINHO SEMPRE_FOI_ASSIM NUMERO_QUEBRADO CelsiusParaKelvin(NUMERO_QUEBRADO c) {
+        TOMA c + 273.15;
+    }
+
+    AMOSTRADINHO SEMPRE_FOI_ASSIM VOLTA_NADA Main() {
+        MANDA_AI("========================================");
+        MANDA_AI("🌡️ CONVERSOR DE TEMPERATURA PUROSUCO 🌡️");
+        MANDA_AI("========================================");
+
+        NUMERO_QUEBRADO tempC RECEBA 25.0;
+        MANDA_AI("Temperatura base em Celsius: 25.0 C");
+
+        NUMERO_QUEBRADO tempF RECEBA CelsiusParaFahrenheit(tempC);
+        NUMERO_QUEBRADO tempK RECEBA CelsiusParaKelvin(tempC);
+
+        MANDA_AI("Em Fahrenheit:");
+        MANDA_AI(tempF);
+
+        MANDA_AI("Em Kelvin:");
+        MANDA_AI(tempK);
+
+        TA_CERTO_ISSO tempC >= 30.0 {
+            MANDA_AI("Status: Ta um calor da peste!");
+        }
+        NAO_TA_NAO {
+            TA_CERTO_ISSO tempC >= 20.0 {
+                MANDA_AI("Status: Clima suave, da pra codar tranquilo.");
+            }
+            NAO_TA_NAO {
+                MANDA_AI("Status: Friaca total.");
+            }
+        }
+    }
+}

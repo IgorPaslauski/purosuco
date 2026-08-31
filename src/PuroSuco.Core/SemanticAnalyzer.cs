@@ -8,6 +8,17 @@ public sealed class SemanticAnalyzer
     private readonly Dictionary<string, FunctionDeclarationSyntax> _functions = new(StringComparer.Ordinal);
     private string? _currentReturnType;
 
+    private void DeclareType(TypeDeclarationSyntax t)
+    {
+        var symbol = new Symbol(t.Name, SymbolKind.Class, t.Name, t.Position, t);
+        _symbols.Add(symbol);
+        foreach (var member in t.Members)
+        {
+            if (member is FunctionDeclarationSyntax fn)
+                DeclareFunction(fn);
+        }
+    }
+
     public SemanticModel Analyze(CompilationUnit unit)
     {
         _diagnostics.Clear();
@@ -24,6 +35,8 @@ public sealed class SemanticAnalyzer
                 DeclareFunction(f);
             else if (member is ClassDeclarationSyntax c)
                 DeclareClass(c);
+            else if (member is TypeDeclarationSyntax t)
+                DeclareType(t);
         }
 
         foreach (var member in unit.Members)
@@ -43,6 +56,11 @@ public sealed class SemanticAnalyzer
     {
         var symbol = new Symbol(cls.Name, SymbolKind.Class, cls.Name, cls.Position, cls);
         _symbols.Add(symbol);
+        foreach (var member in cls.Members)
+        {
+            if (member is FunctionDeclarationSyntax fn)
+                DeclareFunction(fn);
+        }
     }
 
     private void DeclareFunction(FunctionDeclarationSyntax fn)
@@ -72,6 +90,20 @@ public sealed class SemanticAnalyzer
             case ClassDeclarationSyntax c:
                 PushScope();
                 foreach (var child in c.Members)
+                    AnalyzeMember(child);
+                PopScope();
+                break;
+
+            case TypeDeclarationSyntax t:
+                PushScope();
+                foreach (var child in t.Members)
+                    AnalyzeMember(child);
+                PopScope();
+                break;
+
+            case NamespaceDeclarationSyntax ns:
+                PushScope();
+                foreach (var child in ns.Members)
                     AnalyzeMember(child);
                 PopScope();
                 break;
@@ -120,6 +152,42 @@ public sealed class SemanticAnalyzer
             case WhileStatementSyntax @while:
                 AnalyzeCondition(@while.Condition, @while.Position);
                 AnalyzeBlock(@while.Body);
+                break;
+
+            case DoWhileStatementSyntax doWhile:
+                AnalyzeBlock(doWhile.Body);
+                AnalyzeCondition(doWhile.Condition, doWhile.Position);
+                break;
+
+            case ForeachStatementSyntax foreachStmt:
+                PushScope();
+                var varType = NormalizeType(foreachStmt.TypeName);
+                DeclareLocal(new Symbol(foreachStmt.Identifier, SymbolKind.Variable, varType, foreachStmt.Position, foreachStmt), foreachStmt.Position);
+                GetExpressionType(foreachStmt.Collection);
+                AnalyzeBlock(foreachStmt.Body);
+                PopScope();
+                break;
+
+            case TryStatementSyntax tryStmt:
+                AnalyzeBlock(tryStmt.TryBlock);
+                foreach (var catchClause in tryStmt.CatchClauses)
+                {
+                    PushScope();
+                    if (catchClause.Identifier is not null)
+                    {
+                        var exType = catchClause.ExceptionType is not null ? NormalizeType(catchClause.ExceptionType) : "System.Exception";
+                        DeclareLocal(new Symbol(catchClause.Identifier, SymbolKind.Variable, exType, catchClause.Position, catchClause), catchClause.Position);
+                    }
+                    AnalyzeBlock(catchClause.Body);
+                    PopScope();
+                }
+                if (tryStmt.FinallyBlock is not null)
+                    AnalyzeBlock(tryStmt.FinallyBlock);
+                break;
+
+            case ThrowStatementSyntax throwStmt:
+                if (throwStmt.Expression is not null)
+                    GetExpressionType(throwStmt.Expression);
                 break;
 
             case ForStatementSyntax @for:
@@ -241,6 +309,17 @@ public sealed class SemanticAnalyzer
             case BinaryExpressionSyntax binary:
                 return AnalyzeBinary(binary);
 
+            case AwaitExpressionSyntax awaitExpr:
+                return GetExpressionType(awaitExpr.Expression);
+
+            case NewExpressionSyntax newExpr:
+                foreach (var arg in newExpr.Arguments) GetExpressionType(arg);
+                return NormalizeType(newExpr.TypeName);
+
+            case MemberAccessExpressionSyntax memberAccess:
+                GetExpressionType(memberAccess.Target);
+                return "var";
+
             default:
                 return null;
         }
@@ -300,14 +379,19 @@ public sealed class SemanticAnalyzer
     private static bool CanAssign(string target, string value) =>
         target == value || (target == "double" && value == "int") || target == "var" || (target != "void" && value == "null");
 
-    private static string NormalizeType(string type) => type.ToUpperInvariant() switch
+    private static string NormalizeType(string type) => Keywords.Normalize(type) switch
     {
         "NUMERO" => "int",
         "NUMERO_QUEBRADO" => "double",
+        "NUMERO_BRUTO" => "long",
+        "GRANA" => "decimal",
+        "LETRA" => "char",
         "PAPO" => "string",
         "CONFERE" => "bool",
+        "QUALQUER_COISA" => "object",
         "TEM_NADA_AI" => "null",
         "SEI_LA" => "var",
+        "VAI_NA_FE" => "dynamic",
         "VOLTA_NADA" => "void",
         _ => type.ToLowerInvariant()
     };
@@ -316,8 +400,12 @@ public sealed class SemanticAnalyzer
     {
         "int" => "NUMERO",
         "double" => "NUMERO_QUEBRADO",
+        "long" => "NUMERO_BRUTO",
+        "decimal" => "GRANA",
+        "char" => "LETRA",
         "string" => "PAPO",
         "bool" => "CONFERE",
+        "object" => "QUALQUER_COISA",
         "null" => "TEM_NADA_AI",
         "void" => "VOLTA_NADA",
         _ => type

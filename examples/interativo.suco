@@ -1,0 +1,43 @@
+AMOSTRADINHO TROPA Interativo {
+
+    AMOSTRADINHO SEMPRE_FOI_ASSIM VOLTA_NADA Main() {
+        MANDA_AI("======================================");
+        MANDA_AI("🥤 BEM-VINDO AO CHAT INTERATIVO PUROSUCO 🥤");
+        MANDA_AI("======================================");
+
+        MANDA_AI("Fala tu, qual e o seu nome?");
+        PAPO nome RECEBA FALA_TU();
+
+        MANDA_AI("Salve, " + nome + "! Seja bem-vindo a resenha.");
+
+        MANDA_AI("Voce tanka programar em PuroSuco? (sim/nao)");
+        PAPO resposta RECEBA FALA_TU();
+
+        TA_CERTO_ISSO resposta == "sim" {
+            MANDA_AI("RECEBA! Voce e dos nossos, so os de verdade!");
+        }
+        NAO_TA_NAO {
+            MANDA_AI("Ai tu me quebra... Mas relaxa que com o tempo voce tanka!");
+        }
+
+        MANDA_AI("Quantas vezes voce quer ver o grito de guerra?");
+        MANDA_AI("Digite 1, 2 ou 3:");
+        PAPO vezesTexto RECEBA FALA_TU();
+
+        NUMERO vezes RECEBA 1;
+        TA_CERTO_ISSO vezesTexto == "3" {
+            vezes RECEBA 3;
+        }
+        NAO_TA_NAO {
+            TA_CERTO_ISSO vezesTexto == "2" {
+                vezes RECEBA 2;
+            }
+        }
+
+        BORA_BILL (NUMERO i RECEBA 1; i <= vezes; i RECEBA i + 1) {
+            MANDA_AI("PUROSUCO COMPILA O BRASIL! (Vez " + i + ")");
+        }
+
+        MANDA_AI("Valeu, " + nome + "! Tamo junto!");
+    }
+}

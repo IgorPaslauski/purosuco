@@ -1,0 +1,22 @@
+CHAMA System;
+CHAMA System.Collections.Generic;
+
+AMOSTRADINHO TROPA Convocacao {
+
+    AMOSTRADINHO SEMPRE_FOI_ASSIM VOLTA_NADA Main() {
+        MANDA_AI("========================================");
+        MANDA_AI("⚽ CONVOCACAO DA TROPA BRASILEIRA ⚽");
+        MANDA_AI("========================================");
+
+        NUMERO totalConvocados RECEBA 0;
+
+        // Exemplo com do-while (FAZ_PRIMEIRO ... ENQUANTO_TANKAR)
+        NUMERO aquecimento RECEBA 1;
+        FAZ_PRIMEIRO {
+            MANDA_AI("Aquecimento rodada " + aquecimento + " concluido!");
+            aquecimento RECEBA aquecimento + 1;
+        } ENQUANTO_TANKAR (aquecimento <= 3);
+
+        MANDA_AI("Tudo pronto para o jogo! CONFIA!");
+    }
+}

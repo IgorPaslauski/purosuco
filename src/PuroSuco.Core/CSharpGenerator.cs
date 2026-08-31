@@ -24,6 +24,19 @@ public sealed class CSharpGenerator
     {
         switch (member)
         {
+            case UsingDirectiveSyntax u:
+                WriteIndent();
+                _sb.Append("using ").Append(u.NamespaceName).AppendLine(";");
+                break;
+
+            case NamespaceDeclarationSyntax ns:
+                WriteIndent();
+                _sb.Append("namespace ").Append(ns.Name).AppendLine();
+                WriteOpenBrace();
+                foreach (var child in ns.Members) WriteMember(child);
+                WriteCloseBrace();
+                break;
+
             case GlobalStatementSyntax g:
                 WriteStatement(g.Statement);
                 break;
@@ -35,6 +48,26 @@ public sealed class CSharpGenerator
                 WriteOpenBrace();
 
                 foreach (var child in c.Members)
+                    WriteMember(child);
+
+                WriteCloseBrace();
+                break;
+
+            case TypeDeclarationSyntax t:
+                WriteIndent();
+                WriteModifiers(t.Modifiers);
+                var typeKind = Keywords.Normalize(t.TypeKindKeyword) switch
+                {
+                    "PRINT" => "record",
+                    "CARDAPIO" => "enum",
+                    "MINI_TROPA" => "struct",
+                    "PAPO_RETO" => "interface",
+                    _ => "class"
+                };
+                _sb.Append(typeKind).Append(' ').Append(t.Name).AppendLine();
+                WriteOpenBrace();
+
+                foreach (var child in t.Members)
                     WriteMember(child);
 
                 WriteCloseBrace();
@@ -89,6 +122,55 @@ public sealed class CSharpGenerator
                 WriteIndent();
                 _sb.Append("while (").Append(WriteExpression(w.Condition)).AppendLine(")");
                 WriteBlock(w.Body);
+                break;
+
+            case DoWhileStatementSyntax dw:
+                WriteIndent();
+                _sb.AppendLine("do");
+                WriteBlock(dw.Body);
+                WriteIndent();
+                _sb.Append("while (").Append(WriteExpression(dw.Condition)).AppendLine(");");
+                break;
+
+            case ForeachStatementSyntax fe:
+                WriteIndent();
+                _sb.Append("foreach (").Append(MapType(fe.TypeName)).Append(' ').Append(fe.Identifier).Append(" in ").Append(WriteExpression(fe.Collection)).AppendLine(")");
+                WriteBlock(fe.Body);
+                break;
+
+            case TryStatementSyntax tryStmt:
+                WriteIndent();
+                _sb.AppendLine("try");
+                WriteBlock(tryStmt.TryBlock);
+
+                foreach (var c in tryStmt.CatchClauses)
+                {
+                    WriteIndent();
+                    if (c.ExceptionType is not null)
+                    {
+                        var exId = c.Identifier is not null ? $" {c.Identifier}" : "";
+                        _sb.Append("catch (").Append(MapType(c.ExceptionType)).Append(exId).AppendLine(")");
+                    }
+                    else
+                    {
+                        _sb.AppendLine("catch");
+                    }
+                    WriteBlock(c.Body);
+                }
+
+                if (tryStmt.FinallyBlock is not null)
+                {
+                    WriteIndent();
+                    _sb.AppendLine("finally");
+                    WriteBlock(tryStmt.FinallyBlock);
+                }
+                break;
+
+            case ThrowStatementSyntax th:
+                WriteIndent();
+                _sb.Append("throw");
+                if (th.Expression is not null) _sb.Append(' ').Append(WriteExpression(th.Expression));
+                _sb.AppendLine(";");
                 break;
 
             case ForStatementSyntax forStmt:
@@ -154,31 +236,41 @@ public sealed class CSharpGenerator
         NameExpressionSyntax n => n.Identifier,
         BinaryExpressionSyntax b => $"{WriteExpression(b.Left)} {b.Operator} {WriteExpression(b.Right)}",
         CallExpressionSyntax c => $"{MapCall(c.Name)}({string.Join(", ", c.Arguments.Select(WriteExpression))})",
+        MemberAccessExpressionSyntax m => $"{WriteExpression(m.Target)}.{m.MemberName}",
+        AwaitExpressionSyntax a => $"await {WriteExpression(a.Expression)}",
+        NewExpressionSyntax nw => $"new {MapType(nw.TypeName)}({string.Join(", ", nw.Arguments.Select(WriteExpression))})",
         _ => throw new NotSupportedException(expression.GetType().Name)
     };
 
-    private static string WriteLiteral(LiteralExpressionSyntax literal) => literal.TypeName.ToUpperInvariant() switch
+    private static string WriteLiteral(LiteralExpressionSyntax literal) => Keywords.Normalize(literal.TypeName) switch
     {
         "PAPO" => $"\"{literal.Value?.ToString()?.Replace("\"", "\\\"")}\"",
         "CONFERE" => literal.Value is true ? "true" : "false",
         "TEM_NADA_AI" => "null",
+        "NUMERO_QUEBRADO" => Convert.ToString(literal.Value, System.Globalization.CultureInfo.InvariantCulture) ?? "0.0",
         _ => literal.Value?.ToString() ?? "null"
     };
 
-    private static string MapCall(string name) => name.ToUpperInvariant() switch
+    private static string MapCall(string name) => Keywords.Normalize(name) switch
     {
         "MANDA_AI" => "Console.WriteLine",
+        "SOLTA_AI" => "Console.Write",
         "FALA_TU" => "Console.ReadLine",
         _ => name
     };
 
-    private static string MapType(string type) => type.ToUpperInvariant() switch
+    private static string MapType(string type) => Keywords.Normalize(type) switch
     {
         "NUMERO" => "int",
         "NUMERO_QUEBRADO" => "double",
+        "NUMERO_BRUTO" => "long",
+        "GRANA" => "decimal",
+        "LETRA" => "char",
         "PAPO" => "string",
         "CONFERE" => "bool",
+        "QUALQUER_COISA" => "object",
         "SEI_LA" => "var",
+        "VAI_NA_FE" => "dynamic",
         "VOLTA_NADA" => "void",
         _ => type
     };
@@ -187,13 +279,19 @@ public sealed class CSharpGenerator
     {
         foreach (var modifier in modifiers)
         {
-            _sb.Append(modifier.ToUpperInvariant() switch
+            _sb.Append(Keywords.Normalize(modifier) switch
             {
                 "AMOSTRADINHO" => "public ",
-                "NA_MIÚDA" or "NA_MIUDA" => "private ",
+                "NA_MIUDA" => "private ",
                 "SO_OS_DE_VERDADE" => "protected ",
+                "SO_ENTRE_NOS" => "internal ",
                 "SEMPRE_FOI_ASSIM" => "static ",
                 "SO_NA_TEORIA" => "abstract ",
+                "SO_OLHA_NAO_TOCA" => "readonly ",
+                "LACRADO" => "sealed ",
+                "FICA_A_VONTADE" => "virtual ",
+                "ASSUME_A_RESPONSA" => "override ",
+                "NAO_MEXE" => "const ",
                 _ => ""
             });
         }

@@ -24,7 +24,10 @@ public static class AstPrinter
     private static string Label(SyntaxNode node) => node switch
     {
         CompilationUnit => "CompilationUnit",
+        UsingDirectiveSyntax u => $"CHAMA {u.NamespaceName}",
+        NamespaceDeclarationSyntax ns => $"QUEBRADA {ns.Name}",
         ClassDeclarationSyntax c => $"TROPA {c.Name}",
+        TypeDeclarationSyntax t => $"{t.TypeKindKeyword} {t.Name}",
         FunctionDeclarationSyntax f => $"Function {f.ReturnType} {f.Name}",
         ParameterSyntax p => $"Parameter {p.TypeName} {p.Name}",
         GlobalStatementSyntax => "GlobalStatement",
@@ -34,13 +37,21 @@ public static class AstPrinter
         NameExpressionSyntax n => $"Name {n.Identifier}",
         BinaryExpressionSyntax b => $"Binary {b.Operator}",
         CallExpressionSyntax c => $"Call {c.Name}",
-        IfStatementSyntax => "If",
-        WhileStatementSyntax => "While",
+        MemberAccessExpressionSyntax m => $"MemberAccess {m.MemberName}",
+        AwaitExpressionSyntax => "Await (PERAI)",
+        NewExpressionSyntax nw => $"New (BROTOU) {nw.TypeName}",
+        IfStatementSyntax => "If (TA_CERTO_ISSO)",
+        WhileStatementSyntax => "While (ENQUANTO_TANKAR)",
+        DoWhileStatementSyntax => "DoWhile (FAZ_PRIMEIRO)",
         ForStatementSyntax => "For (BORA_BILL)",
-        ReturnStatementSyntax => "Return",
+        ForeachStatementSyntax fe => $"Foreach (PRA_CADA_UM {fe.Identifier})",
+        TryStatementSyntax => "Try (VAI_DAR_BOM)",
+        CatchClauseSyntax cc => $"Catch (DEU_RUIM {cc.ExceptionType ?? ""})",
+        ThrowStatementSyntax => "Throw (AI_TU_ME_QUEBRA)",
+        ReturnStatementSyntax => "Return (TOMA)",
         BlockStatementSyntax => "Block",
-        BreakStatementSyntax => "Break",
-        ContinueStatementSyntax => "Continue",
+        BreakStatementSyntax => "Break (CHEGA)",
+        ContinueStatementSyntax => "Continue (SEGUE_O_JOGO)",
         ExpressionStatementSyntax => "ExpressionStatement",
         _ => node.GetType().Name
     };
@@ -52,8 +63,14 @@ public static class AstPrinter
             case CompilationUnit c:
                 foreach (var x in c.Members) yield return x;
                 break;
+            case NamespaceDeclarationSyntax ns:
+                foreach (var x in ns.Members) yield return x;
+                break;
             case ClassDeclarationSyntax c:
                 foreach (var x in c.Members) yield return x;
+                break;
+            case TypeDeclarationSyntax t:
+                foreach (var x in t.Members) yield return x;
                 break;
             case FunctionDeclarationSyntax f:
                 foreach (var p in f.Parameters) yield return p;
@@ -83,11 +100,30 @@ public static class AstPrinter
                 yield return w.Condition;
                 yield return w.Body;
                 break;
+            case DoWhileStatementSyntax dw:
+                yield return dw.Body;
+                yield return dw.Condition;
+                break;
             case ForStatementSyntax forStmt:
                 if (forStmt.Initializer is not null) yield return forStmt.Initializer;
                 if (forStmt.Condition is not null) yield return forStmt.Condition;
                 if (forStmt.Increment is not null) yield return forStmt.Increment;
                 yield return forStmt.Body;
+                break;
+            case ForeachStatementSyntax fe:
+                yield return fe.Collection;
+                yield return fe.Body;
+                break;
+            case TryStatementSyntax tryStmt:
+                yield return tryStmt.TryBlock;
+                foreach (var c in tryStmt.CatchClauses) yield return c;
+                if (tryStmt.FinallyBlock is not null) yield return tryStmt.FinallyBlock;
+                break;
+            case CatchClauseSyntax cc:
+                yield return cc.Body;
+                break;
+            case ThrowStatementSyntax th when th.Expression is not null:
+                yield return th.Expression;
                 break;
             case ReturnStatementSyntax r when r.Expression is not null:
                 yield return r.Expression;
@@ -98,6 +134,15 @@ public static class AstPrinter
                 break;
             case CallExpressionSyntax c:
                 foreach (var a in c.Arguments) yield return a;
+                break;
+            case MemberAccessExpressionSyntax m:
+                yield return m.Target;
+                break;
+            case AwaitExpressionSyntax a:
+                yield return a.Expression;
+                break;
+            case NewExpressionSyntax nw:
+                foreach (var a in nw.Arguments) yield return a;
                 break;
         }
     }

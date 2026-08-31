@@ -20,11 +20,35 @@ public sealed class Parser
 
     private MemberSyntax ParseMember()
     {
+        if (MatchKeyword("CHAMA"))
+        {
+            var pos = Previous.Position;
+            var ns = ConsumeNamespaceName();
+            ConsumeOptional(TokenKind.Semicolon);
+            return new UsingDirectiveSyntax(ns, pos);
+        }
+
+        if (MatchKeyword("QUEBRADA"))
+        {
+            var pos = Previous.Position;
+            var ns = ConsumeNamespaceName();
+            var open = Consume(TokenKind.OpenBrace, "PS104", "ABRE ESSA CHAVE", "Esperava '{' na declaração de QUEBRADA.");
+
+            var members = new List<MemberSyntax>();
+            while (Current.Kind != TokenKind.CloseBrace && Current.Kind != TokenKind.EndOfFile)
+                members.Add(ParseMember());
+
+            Consume(TokenKind.CloseBrace, "PS105", "FECHA ESSA CHAVE", "Esperava '}' na QUEBRADA.");
+            return new NamespaceDeclarationSyntax(ns, members, pos);
+        }
+
         var modifiers = ParseModifiers();
 
-        if (MatchKeyword("TROPA"))
+        if (IsTypeDeclarationKeyword(Current.Text))
         {
-            var name = Consume(TokenKind.Identifier, "PS110", "CADÊ O NOME DA TROPA?", "Esperava o nome da classe.");
+            var kindToken = Advance();
+            var kindNormalized = Keywords.Normalize(kindToken.Text);
+            var name = Consume(TokenKind.Identifier, "PS110", "CADÊ O NOME?", $"Esperava o nome após {kindToken.Text}.");
             var open = Consume(TokenKind.OpenBrace, "PS104", "ABRE ESSA CHAVE", "Esperava '{'.");
 
             var members = new List<MemberSyntax>();
@@ -32,7 +56,11 @@ public sealed class Parser
                 members.Add(ParseMember());
 
             Consume(TokenKind.CloseBrace, "PS105", "FECHA ESSA CHAVE", "Esperava '}'.");
-            return new ClassDeclarationSyntax(name.Text, members, modifiers, open.Position);
+
+            if (kindNormalized == "TROPA")
+                return new ClassDeclarationSyntax(name.Text, members, modifiers, open.Position);
+
+            return new TypeDeclarationSyntax(kindNormalized, name.Text, members, modifiers, open.Position);
         }
 
         if (LooksLikeFunction())
@@ -43,6 +71,28 @@ public sealed class Parser
 
         var stmt = ParseStatement();
         return new GlobalStatementSyntax(stmt, stmt.Position);
+    }
+
+    private string ConsumeNamespaceName()
+    {
+        var sb = new System.Text.StringBuilder();
+        var id = Consume(TokenKind.Identifier, "PS115", "CADÊ O NOME?", "Esperava nome de namespace/biblioteca.");
+        sb.Append(id.Text);
+
+        while (Current.Text == ".")
+        {
+            Advance();
+            var next = Consume(TokenKind.Identifier, "PS115", "CADÊ O NOME?", "Esperava identificador após '.'.");
+            sb.Append('.').Append(next.Text);
+        }
+
+        return sb.ToString();
+    }
+
+    private static bool IsTypeDeclarationKeyword(string text)
+    {
+        var norm = Keywords.Normalize(text);
+        return norm is "TROPA" or "PRINT" or "CARDAPIO" or "MINI_TROPA" or "PAPO_RETO";
     }
 
     private FunctionDeclarationSyntax ParseFunction(IReadOnlyList<string> modifiers)
@@ -90,7 +140,11 @@ public sealed class Parser
     {
         if (MatchKeyword("TA_CERTO_ISSO")) return ParseIf();
         if (MatchKeyword("ENQUANTO_TANKAR")) return ParseWhile();
+        if (MatchKeyword("FAZ_PRIMEIRO")) return ParseDoWhile();
         if (MatchKeyword("BORA_BILL")) return ParseFor();
+        if (MatchKeyword("PRA_CADA_UM")) return ParseForeach();
+        if (MatchKeyword("VAI_DAR_BOM")) return ParseTry();
+        if (MatchKeyword("AI_TU_ME_QUEBRA")) return ParseThrow();
         if (MatchKeyword("TOMA")) return ParseReturn();
 
         if (MatchKeyword("CHEGA"))
@@ -112,12 +166,87 @@ public sealed class Parser
 
         if (Current.Kind == TokenKind.Identifier &&
             Peek(1).Kind == TokenKind.Keyword &&
-            Peek(1).Text.Equals("RECEBA", StringComparison.OrdinalIgnoreCase))
+            Keywords.Normalize(Peek(1).Text) == "RECEBA")
             return ParseAssignment();
 
         var expr = ParseExpression();
         ConsumeOptional(TokenKind.Semicolon);
         return new ExpressionStatementSyntax(expr, expr.Position);
+    }
+
+    private TryStatementSyntax ParseTry()
+    {
+        var pos = Previous.Position;
+        var tryBlock = ParseBlock();
+        var catches = new List<CatchClauseSyntax>();
+
+        while (MatchKeyword("DEU_RUIM") || MatchKeyword("METEU_ESSA"))
+        {
+            var catchPos = Previous.Position;
+            string? exType = null;
+            string? exName = null;
+
+            if (MatchOptional(TokenKind.OpenParen))
+            {
+                if (Current.Kind is TokenKind.Identifier or TokenKind.Keyword && Current.Kind != TokenKind.CloseParen)
+                {
+                    exType = Advance().Text;
+                    if (Current.Kind == TokenKind.Identifier)
+                        exName = Advance().Text;
+                }
+                Consume(TokenKind.CloseParen, "PS109", "FECHA O PAPO", "Esperava ')' no bloco de captura de erro.");
+            }
+
+            var catchBody = ParseBlock();
+            catches.Add(new CatchClauseSyntax(exType, exName, catchBody, catchPos));
+        }
+
+        BlockStatementSyntax? finallyBlock = null;
+        if (MatchKeyword("DE_QUALQUER_JEITO"))
+        {
+            finallyBlock = ParseBlock();
+        }
+
+        return new TryStatementSyntax(tryBlock, catches, finallyBlock, pos);
+    }
+
+    private ThrowStatementSyntax ParseThrow()
+    {
+        var pos = Previous.Position;
+        ExpressionSyntax? expr = null;
+
+        if (Current.Kind != TokenKind.Semicolon && Current.Kind != TokenKind.CloseBrace && Current.Kind != TokenKind.EndOfFile)
+            expr = ParseExpression();
+
+        ConsumeOptional(TokenKind.Semicolon);
+        return new ThrowStatementSyntax(expr, pos);
+    }
+
+    private ForeachStatementSyntax ParseForeach()
+    {
+        var pos = Previous.Position;
+        var hasParen = MatchOptional(TokenKind.OpenParen);
+
+        var type = ConsumeType();
+        var identifier = Consume(TokenKind.Identifier, "PS101", "CADÊ O NOME?", "Esperava variável de iteração no PRA_CADA_UM.");
+        ConsumeKeyword("DENTRO_DE", "PS116", "DENTRO DE QUEM?", "Esperava DENTRO_DE no PRA_CADA_UM.");
+        var collection = ParseExpression();
+
+        if (hasParen)
+            Consume(TokenKind.CloseParen, "PS109", "FECHA O PAPO", "Esperava ')' no PRA_CADA_UM.");
+
+        var body = ParseBlock();
+        return new ForeachStatementSyntax(type.Text, identifier.Text, collection, body, pos);
+    }
+
+    private DoWhileStatementSyntax ParseDoWhile()
+    {
+        var pos = Previous.Position;
+        var body = ParseBlock();
+        ConsumeKeyword("ENQUANTO_TANKAR", "PS117", "TANKA ATÉ QUANDO?", "Esperava ENQUANTO_TANKAR após FAZ_PRIMEIRO.");
+        var condition = ParseExpression();
+        ConsumeOptional(TokenKind.Semicolon);
+        return new DoWhileStatementSyntax(body, condition, pos);
     }
 
     private StatementSyntax ParseVariableDeclaration()
@@ -173,7 +302,7 @@ public sealed class Parser
         {
             if (IsTypeKeyword(Current.Text))
                 initializer = ParseVariableDeclaration();
-            else if (Current.Kind == TokenKind.Identifier && Peek(1).Kind == TokenKind.Keyword && Peek(1).Text.Equals("RECEBA", StringComparison.OrdinalIgnoreCase))
+            else if (Current.Kind == TokenKind.Identifier && Peek(1).Kind == TokenKind.Keyword && Keywords.Normalize(Peek(1).Text) == "RECEBA")
                 initializer = ParseAssignment();
             else
             {
@@ -195,7 +324,7 @@ public sealed class Parser
         StatementSyntax? increment = null;
         if (Current.Kind != TokenKind.CloseParen && Current.Kind != TokenKind.OpenBrace)
         {
-            if (Current.Kind == TokenKind.Identifier && Peek(1).Kind == TokenKind.Keyword && Peek(1).Text.Equals("RECEBA", StringComparison.OrdinalIgnoreCase))
+            if (Current.Kind == TokenKind.Identifier && Peek(1).Kind == TokenKind.Keyword && Keywords.Normalize(Peek(1).Text) == "RECEBA")
                 increment = ParseAssignment();
             else
             {
@@ -242,7 +371,30 @@ public sealed class Parser
     {
         ExpressionSyntax left;
 
-        if (Current.Kind == TokenKind.OpenParen)
+        if (MatchKeyword("PERAI"))
+        {
+            var pos = Previous.Position;
+            var operand = ParseExpression(6);
+            left = new AwaitExpressionSyntax(operand, pos);
+        }
+        else if (MatchKeyword("BROTOU"))
+        {
+            var pos = Previous.Position;
+            var typeToken = ConsumeTypeOrIdentifier();
+            var args = new List<ExpressionSyntax>();
+            if (MatchOptional(TokenKind.OpenParen))
+            {
+                while (Current.Kind != TokenKind.CloseParen && Current.Kind != TokenKind.EndOfFile)
+                {
+                    args.Add(ParseExpression());
+                    if (Current.Text == ",") Advance();
+                    else break;
+                }
+                Consume(TokenKind.CloseParen, "PS109", "FECHA O PAPO", "Esperava ')' no BROTOU.");
+            }
+            left = new NewExpressionSyntax(typeToken.Text, args, pos);
+        }
+        else if (Current.Kind == TokenKind.OpenParen)
         {
             Advance();
             left = ParseExpression();
@@ -255,6 +407,22 @@ public sealed class Parser
 
         while (true)
         {
+            if (Current.Text == ".")
+            {
+                Advance();
+                var member = Consume(TokenKind.Identifier, "PS118", "CADÊ O MEMBRO?", "Esperava nome de método ou propriedade após '.'.");
+                if (Current.Kind == TokenKind.OpenParen)
+                {
+                    var call = ParseCall(member.Text, member.Position);
+                    left = new MemberAccessExpressionSyntax(left, call.Name + "(" + string.Join(", ", call.Arguments) + ")", member.Position);
+                }
+                else
+                {
+                    left = new MemberAccessExpressionSyntax(left, member.Text, member.Position);
+                }
+                continue;
+            }
+
             var precedence = GetBinaryPrecedence(Current.Text);
             if (precedence == 0 || precedence <= parentPrecedence) break;
 
@@ -266,6 +434,14 @@ public sealed class Parser
         return left;
     }
 
+    private Token ConsumeTypeOrIdentifier()
+    {
+        if (IsTypeKeyword(Current.Text) || Current.Kind == TokenKind.Identifier)
+            return Advance();
+
+        throw new PuroSucoException("PS114", "QUE TIPO É ESSE?", "Esperava um tipo ou classe.", Current.Position);
+    }
+
     private ExpressionSyntax ParsePrimary()
     {
         var token = Current;
@@ -273,6 +449,9 @@ public sealed class Parser
         if (token.Kind == TokenKind.Number)
         {
             Advance();
+            if (token.Text.Contains('.'))
+                return new LiteralExpressionSyntax(double.Parse(token.Text, System.Globalization.CultureInfo.InvariantCulture), "NUMERO_QUEBRADO", token.Position);
+
             return new LiteralExpressionSyntax(int.Parse(token.Text), "NUMERO", token.Position);
         }
 
@@ -282,31 +461,39 @@ public sealed class Parser
             return new LiteralExpressionSyntax(token.Text[1..^1], "PAPO", token.Position);
         }
 
-        if (token.Kind == TokenKind.Keyword && token.Text.Equals("CONFIA", StringComparison.OrdinalIgnoreCase))
+        var normalized = Keywords.Normalize(token.Text);
+
+        if (token.Kind == TokenKind.Keyword && normalized == "CONFIA")
         {
             Advance();
             return new LiteralExpressionSyntax(true, "CONFERE", token.Position);
         }
 
-        if (token.Kind == TokenKind.Keyword && token.Text.Equals("CONFIA_NAO", StringComparison.OrdinalIgnoreCase))
+        if (token.Kind == TokenKind.Keyword && (normalized == "CONFIA_NAO" || normalized == "E_MENTIRA"))
         {
             Advance();
             return new LiteralExpressionSyntax(false, "CONFERE", token.Position);
         }
 
-        if (token.Kind == TokenKind.Keyword && token.Text.Equals("TEM_NADA_AI", StringComparison.OrdinalIgnoreCase))
+        if (token.Kind == TokenKind.Keyword && normalized == "TEM_NADA_AI")
         {
             Advance();
             return new LiteralExpressionSyntax(null, "TEM_NADA_AI", token.Position);
         }
 
-        if (token.Kind == TokenKind.Keyword && token.Text.Equals("MANDA_AI", StringComparison.OrdinalIgnoreCase))
+        if (token.Kind == TokenKind.Keyword && normalized == "MANDA_AI")
         {
             Advance();
             return ParseCall(token.Text, token.Position);
         }
 
-        if (token.Kind == TokenKind.Keyword && token.Text.Equals("FALA_TU", StringComparison.OrdinalIgnoreCase))
+        if (token.Kind == TokenKind.Keyword && normalized == "SOLTA_AI")
+        {
+            Advance();
+            return ParseCall(token.Text, token.Position);
+        }
+
+        if (token.Kind == TokenKind.Keyword && normalized == "FALA_TU")
         {
             Advance();
             return ParseCall(token.Text, token.Position);
@@ -349,13 +536,21 @@ public sealed class Parser
         throw new PuroSucoException("PS114", "QUE TIPO É ESSE?", "Esperava um tipo PuroSuco.", Current.Position);
     }
 
-    private static bool IsModifier(string text) =>
-        text.Equals("AMOSTRADINHO", StringComparison.OrdinalIgnoreCase) ||
-        text.Equals("NA_MIÚDA", StringComparison.OrdinalIgnoreCase) ||
-        text.Equals("NA_MIUDA", StringComparison.OrdinalIgnoreCase) ||
-        text.Equals("SO_OS_DE_VERDADE", StringComparison.OrdinalIgnoreCase) ||
-        text.Equals("SEMPRE_FOI_ASSIM", StringComparison.OrdinalIgnoreCase) ||
-        text.Equals("SO_NA_TEORIA", StringComparison.OrdinalIgnoreCase);
+    private static bool IsModifier(string text)
+    {
+        var normalized = Keywords.Normalize(text);
+        return normalized is "AMOSTRADINHO"
+            or "NA_MIUDA"
+            or "SO_OS_DE_VERDADE"
+            or "SO_ENTRE_NOS"
+            or "SEMPRE_FOI_ASSIM"
+            or "SO_NA_TEORIA"
+            or "SO_OLHA_NAO_TOCA"
+            or "LACRADO"
+            or "FICA_A_VONTADE"
+            or "ASSUME_A_RESPONSA"
+            or "NAO_MEXE";
+    }
 
     private static int GetBinaryPrecedence(string op) => op switch
     {
@@ -366,13 +561,21 @@ public sealed class Parser
         _ => 0
     };
 
-    private static bool IsTypeKeyword(string text) =>
-        text.Equals("NUMERO", StringComparison.OrdinalIgnoreCase) ||
-        text.Equals("NUMERO_QUEBRADO", StringComparison.OrdinalIgnoreCase) ||
-        text.Equals("PAPO", StringComparison.OrdinalIgnoreCase) ||
-        text.Equals("CONFERE", StringComparison.OrdinalIgnoreCase) ||
-        text.Equals("SEI_LA", StringComparison.OrdinalIgnoreCase) ||
-        text.Equals("VOLTA_NADA", StringComparison.OrdinalIgnoreCase);
+    private static bool IsTypeKeyword(string text)
+    {
+        var normalized = Keywords.Normalize(text);
+        return normalized is "NUMERO"
+            or "NUMERO_QUEBRADO"
+            or "NUMERO_BRUTO"
+            or "PAPO"
+            or "LETRA"
+            or "GRANA"
+            or "CONFERE"
+            or "QUALQUER_COISA"
+            or "SEI_LA"
+            or "VAI_NA_FE"
+            or "VOLTA_NADA";
+    }
 
     private Token Current => Peek(0);
     private Token Previous => _tokens[Math.Max(0, _position - 1)];
@@ -393,7 +596,7 @@ public sealed class Parser
     private bool MatchKeyword(string keyword)
     {
         if (Current.Kind == TokenKind.Keyword &&
-            Current.Text.Equals(keyword, StringComparison.OrdinalIgnoreCase))
+            Keywords.Normalize(Current.Text) == Keywords.Normalize(keyword))
         {
             Advance();
             return true;

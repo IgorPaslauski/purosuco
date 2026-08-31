@@ -8,6 +8,22 @@ public sealed record CompilationUnit(
 
 public abstract record MemberSyntax(int Position) : SyntaxNode(Position);
 
+public sealed record UsingDirectiveSyntax(
+    string NamespaceName,
+    int Position) : MemberSyntax(Position);
+
+public sealed record NamespaceDeclarationSyntax(
+    string Name,
+    IReadOnlyList<MemberSyntax> Members,
+    int Position) : MemberSyntax(Position);
+
+public sealed record TypeDeclarationSyntax(
+    string TypeKindKeyword, // TROPA, PRINT, MINI_TROPA, PAPO_RETO, CARDAPIO
+    string Name,
+    IReadOnlyList<MemberSyntax> Members,
+    IReadOnlyList<string> Modifiers,
+    int Position) : MemberSyntax(Position);
+
 public sealed record ClassDeclarationSyntax(
     string Name,
     IReadOnlyList<MemberSyntax> Members,
@@ -63,11 +79,39 @@ public sealed record WhileStatementSyntax(
     BlockStatementSyntax Body,
     int Position) : StatementSyntax(Position);
 
+public sealed record DoWhileStatementSyntax(
+    BlockStatementSyntax Body,
+    ExpressionSyntax Condition,
+    int Position) : StatementSyntax(Position);
+
 public sealed record ForStatementSyntax(
     StatementSyntax? Initializer,
     ExpressionSyntax? Condition,
     StatementSyntax? Increment,
     BlockStatementSyntax Body,
+    int Position) : StatementSyntax(Position);
+
+public sealed record ForeachStatementSyntax(
+    string TypeName,
+    string Identifier,
+    ExpressionSyntax Collection,
+    BlockStatementSyntax Body,
+    int Position) : StatementSyntax(Position);
+
+public sealed record TryStatementSyntax(
+    BlockStatementSyntax TryBlock,
+    IReadOnlyList<CatchClauseSyntax> CatchClauses,
+    BlockStatementSyntax? FinallyBlock,
+    int Position) : StatementSyntax(Position);
+
+public sealed record CatchClauseSyntax(
+    string? ExceptionType,
+    string? Identifier,
+    BlockStatementSyntax Body,
+    int Position) : SyntaxNode(Position);
+
+public sealed record ThrowStatementSyntax(
+    ExpressionSyntax? Expression,
     int Position) : StatementSyntax(Position);
 
 public sealed record ReturnStatementSyntax(
@@ -98,3 +142,18 @@ public sealed record CallExpressionSyntax(
     string Name,
     IReadOnlyList<ExpressionSyntax> Arguments,
     int Position) : ExpressionSyntax(Position);
+
+public sealed record MemberAccessExpressionSyntax(
+    ExpressionSyntax Target,
+    string MemberName,
+    int Position) : ExpressionSyntax(Position);
+
+public sealed record AwaitExpressionSyntax(
+    ExpressionSyntax Expression,
+    int Position) : ExpressionSyntax(Position);
+
+public sealed record NewExpressionSyntax(
+    string TypeName,
+    IReadOnlyList<ExpressionSyntax> Arguments,
+    int Position) : ExpressionSyntax(Position);
+

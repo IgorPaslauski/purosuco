@@ -1,0 +1,61 @@
+AMOSTRADINHO TROPA BancoDigital {
+
+    AMOSTRADINHO SEMPRE_FOI_ASSIM NUMERO Sacar(NUMERO saldoAtual, NUMERO valorSaque) {
+        TA_CERTO_ISSO valorSaque <= 0 {
+            MANDA_AI("Valor invalido para saque! Ai tu me quebra.");
+            TOMA saldoAtual;
+        }
+
+        TA_CERTO_ISSO valorSaque > saldoAtual {
+            MANDA_AI("Saldo insuficiente! Ta querendo gastar o que nao tem?");
+            TOMA saldoAtual;
+        }
+
+        NUMERO novoSaldo RECEBA saldoAtual - valorSaque;
+        MANDA_AI("Saque de R$ " + valorSaque + " realizado com sucesso!");
+        TOMA novoSaldo;
+    }
+
+    AMOSTRADINHO SEMPRE_FOI_ASSIM NUMERO Depositar(NUMERO saldoAtual, NUMERO valorDeposito) {
+        TA_CERTO_ISSO valorDeposito <= 0 {
+            MANDA_AI("Valor invalido para deposito!");
+            TOMA saldoAtual;
+        }
+
+        NUMERO novoSaldo RECEBA saldoAtual + valorDeposito;
+        MANDA_AI("RECEBA! Deposito de R$ " + valorDeposito + " confirmado.");
+        TOMA novoSaldo;
+    }
+
+    AMOSTRADINHO SEMPRE_FOI_ASSIM VOLTA_NADA Main() {
+        MANDA_AI("========================================");
+        MANDA_AI("🏦 BEM-VINDO AO BANCO PUROSUCO 🏦");
+        MANDA_AI("========================================");
+
+        MANDA_AI("Informe o nome do titular da conta:");
+        PAPO titular RECEBA FALA_TU();
+
+        NUMERO saldo RECEBA 1000;
+        CONFERE executando RECEBA CONFIA;
+
+        MANDA_AI("Ola, " + titular + "! Seu saldo inicial e: R$ " + saldo);
+
+        // Simulando operacoes bancarias
+        saldo RECEBA Depositar(saldo, 500);
+        saldo RECEBA Sacar(saldo, 200);
+        saldo RECEBA Sacar(saldo, 2000); // Teste de erro de saldo
+
+        MANDA_AI("");
+        MANDA_AI("Extrato final da conta de " + titular + ":");
+        MANDA_AI("Saldo disponivel: R$ " + saldo);
+
+        TA_CERTO_ISSO saldo >= 1000 {
+            MANDA_AI("Status: Ta com a vida ganha!");
+        }
+        NAO_TA_NAO {
+            MANDA_AI("Status: Economiza ai meu parceiro.");
+        }
+
+        MANDA_AI("Obrigado por utilizar o Banco PuroSuco. CONFIA!");
+    }
+}

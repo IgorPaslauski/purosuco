@@ -28,6 +28,25 @@ public sealed class Formatter
     {
         switch (member)
         {
+            case UsingDirectiveSyntax u:
+                WriteIndent();
+                _sb.Append("CHAMA ").Append(u.NamespaceName).AppendLine(";");
+                break;
+
+            case NamespaceDeclarationSyntax ns:
+                WriteIndent();
+                _sb.Append("QUEBRADA ").Append(ns.Name).AppendLine(" {");
+                _indent++;
+                for (var i = 0; i < ns.Members.Count; i++)
+                {
+                    WriteMember(ns.Members[i]);
+                    if (i < ns.Members.Count - 1) _sb.AppendLine();
+                }
+                _indent--;
+                WriteIndent();
+                _sb.AppendLine("}");
+                break;
+
             case GlobalStatementSyntax g:
                 WriteStatement(g.Statement);
                 break;
@@ -42,6 +61,24 @@ public sealed class Formatter
                 {
                     WriteMember(c.Members[i]);
                     if (i < c.Members.Count - 1)
+                        _sb.AppendLine();
+                }
+
+                _indent--;
+                WriteIndent();
+                _sb.AppendLine("}");
+                break;
+
+            case TypeDeclarationSyntax t:
+                WriteIndent();
+                WriteModifiers(t.Modifiers);
+                _sb.Append(t.TypeKindKeyword).Append(' ').Append(t.Name).AppendLine(" {");
+                _indent++;
+
+                for (var i = 0; i < t.Members.Count; i++)
+                {
+                    WriteMember(t.Members[i]);
+                    if (i < t.Members.Count - 1)
                         _sb.AppendLine();
                 }
 
@@ -121,6 +158,73 @@ public sealed class Formatter
                 _sb.AppendLine("}");
                 break;
 
+            case DoWhileStatementSyntax dw:
+                WriteIndent();
+                _sb.AppendLine("FAZ_PRIMEIRO {");
+                _indent++;
+                foreach (var s in dw.Body.Statements) WriteStatement(s);
+                _indent--;
+                WriteIndent();
+                _sb.Append("} ENQUANTO_TANKAR ").Append(WriteExpression(dw.Condition)).AppendLine(";");
+                break;
+
+            case ForeachStatementSyntax fe:
+                WriteIndent();
+                _sb.Append("PRA_CADA_UM (").Append(fe.TypeName).Append(' ').Append(fe.Identifier).Append(" DENTRO_DE ").Append(WriteExpression(fe.Collection)).AppendLine(") {");
+                _indent++;
+                foreach (var s in fe.Body.Statements) WriteStatement(s);
+                _indent--;
+                WriteIndent();
+                _sb.AppendLine("}");
+                break;
+
+            case TryStatementSyntax tryStmt:
+                WriteIndent();
+                _sb.AppendLine("VAI_DAR_BOM {");
+                _indent++;
+                foreach (var s in tryStmt.TryBlock.Statements) WriteStatement(s);
+                _indent--;
+                WriteIndent();
+                _sb.AppendLine("}");
+
+                foreach (var c in tryStmt.CatchClauses)
+                {
+                    WriteIndent();
+                    if (c.ExceptionType is not null)
+                    {
+                        var id = c.Identifier is not null ? $" {c.Identifier}" : "";
+                        _sb.Append("DEU_RUIM (").Append(c.ExceptionType).Append(id).AppendLine(") {");
+                    }
+                    else
+                    {
+                        _sb.AppendLine("DEU_RUIM {");
+                    }
+                    _indent++;
+                    foreach (var s in c.Body.Statements) WriteStatement(s);
+                    _indent--;
+                    WriteIndent();
+                    _sb.AppendLine("}");
+                }
+
+                if (tryStmt.FinallyBlock is not null)
+                {
+                    WriteIndent();
+                    _sb.AppendLine("DE_QUALQUER_JEITO {");
+                    _indent++;
+                    foreach (var s in tryStmt.FinallyBlock.Statements) WriteStatement(s);
+                    _indent--;
+                    WriteIndent();
+                    _sb.AppendLine("}");
+                }
+                break;
+
+            case ThrowStatementSyntax th:
+                WriteIndent();
+                _sb.Append("AI_TU_ME_QUEBRA");
+                if (th.Expression is not null) _sb.Append(' ').Append(WriteExpression(th.Expression));
+                _sb.AppendLine(";");
+                break;
+
             case ForStatementSyntax forStmt:
                 WriteIndent();
                 _sb.Append("BORA_BILL (");
@@ -187,6 +291,9 @@ public sealed class Formatter
         NameExpressionSyntax n => n.Identifier,
         BinaryExpressionSyntax b => $"{WriteExpression(b.Left)} {b.Operator} {WriteExpression(b.Right)}",
         CallExpressionSyntax c => $"{c.Name}({string.Join(", ", c.Arguments.Select(WriteExpression))})",
+        MemberAccessExpressionSyntax m => $"{WriteExpression(m.Target)}.{m.MemberName}",
+        AwaitExpressionSyntax a => $"PERAI {WriteExpression(a.Expression)}",
+        NewExpressionSyntax nw => $"BROTOU {nw.TypeName}({string.Join(", ", nw.Arguments.Select(WriteExpression))})",
         _ => ""
     };
 

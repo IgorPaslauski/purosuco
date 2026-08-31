@@ -26,7 +26,8 @@ public sealed class HoverHandler : HoverHandlerBase
         var word = TextUtilities.WordAt(text, request.Position);
         if (word is null) return Task.FromResult<Hover?>(null);
 
-        if (MemeDictionary.Keywords.TryGetValue(word.Value.Word, out var info))
+        var normalizedWord = Keywords.Normalize(word.Value.Word);
+        if (MemeDictionary.Keywords.TryGetValue(normalizedWord, out var info))
         {
             return Task.FromResult<Hover?>(new Hover
             {

@@ -1,0 +1,46 @@
+AMOSTRADINHO TROPA AlgoritmosClassicos {
+
+    AMOSTRADINHO SEMPRE_FOI_ASSIM NUMERO Fatorial(NUMERO n) {
+        TA_CERTO_ISSO n <= 1 {
+            TOMA 1;
+        }
+
+        NUMERO total RECEBA 1;
+        BORA_BILL (NUMERO i RECEBA 2; i <= n; i RECEBA i + 1) {
+            total RECEBA total * i;
+        }
+        TOMA total;
+    }
+
+    AMOSTRADINHO SEMPRE_FOI_ASSIM VOLTA_NADA ExibirFibonacci(NUMERO quantidade) {
+        MANDA_AI("Sequencia de Fibonacci (" + quantidade + " termos):");
+
+        NUMERO a RECEBA 0;
+        NUMERO b RECEBA 1;
+        NUMERO contador RECEBA 0;
+
+        ENQUANTO_TANKAR contador < quantidade {
+            MANDA_AI(a);
+            NUMERO proximo RECEBA a + b;
+            a RECEBA b;
+            b RECEBA proximo;
+            contador RECEBA contador + 1;
+        }
+    }
+
+    AMOSTRADINHO SEMPRE_FOI_ASSIM VOLTA_NADA Main() {
+        MANDA_AI("🥤 === ALGORITMOS CLASSICOS NO PUROSUCO === 🥤");
+
+        MANDA_AI("Calculando Fatorial de 5:");
+        NUMERO fat5 RECEBA Fatorial(5);
+        MANDA_AI(fat5);
+
+        MANDA_AI("Calculando Fatorial de 6:");
+        NUMERO fat6 RECEBA Fatorial(6);
+        MANDA_AI(fat6);
+
+        ExibirFibonacci(8);
+
+        MANDA_AI("Algoritmos executados com sucesso! CONFIA.");
+    }
+}

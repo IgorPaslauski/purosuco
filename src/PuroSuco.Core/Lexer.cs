@@ -23,6 +23,29 @@ public sealed class Lexer
                 continue;
             }
 
+            if (c == '/' && _position + 1 < _source.Length)
+            {
+                if (_source[_position + 1] == '/')
+                {
+                    _position += 2;
+                    while (_position < _source.Length && _source[_position] != '\n' && _source[_position] != '\r')
+                        _position++;
+                    continue;
+                }
+
+                if (_source[_position + 1] == '*')
+                {
+                    _position += 2;
+                    while (_position + 1 < _source.Length && !(_source[_position] == '*' && _source[_position + 1] == '/'))
+                        _position++;
+                    if (_position + 1 < _source.Length)
+                        _position += 2;
+                    else
+                        _position = _source.Length;
+                    continue;
+                }
+            }
+
             if (char.IsLetter(c) || c == '_')
             {
                 tokens.Add(ReadWord());
@@ -41,7 +64,7 @@ public sealed class Lexer
                 continue;
             }
 
-            if ("+-*/><!".Contains(c))
+            if ("=+-*/><!".Contains(c))
             {
                 tokens.Add(ReadOperator());
                 continue;
@@ -80,6 +103,13 @@ public sealed class Lexer
         var start = _position;
         while (_position < _source.Length && char.IsDigit(_source[_position]))
             _position++;
+
+        if (_position < _source.Length && _source[_position] == '.' && _position + 1 < _source.Length && char.IsDigit(_source[_position + 1]))
+        {
+            _position++;
+            while (_position < _source.Length && char.IsDigit(_source[_position]))
+                _position++;
+        }
 
         return new Token(TokenKind.Number, _source[start.._position], start);
     }
