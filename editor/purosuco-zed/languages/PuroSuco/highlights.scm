@@ -25,10 +25,10 @@
 ] @function.builtin
 
 (class_declaration
-  name: (identifier) @type.class)
+  (identifier) @type.class)
 
 (function_declaration
-  name: (identifier) @function)
+  (identifier) @function)
 
 (call_expression
   (identifier) @function)
