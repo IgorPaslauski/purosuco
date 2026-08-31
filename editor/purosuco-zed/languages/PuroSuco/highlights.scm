@@ -10,13 +10,7 @@
   "BORA_BILL"
   "CHEGA"
   "SEGUE_O_JOGO"
-  "VAI_DAR_BOM"
-  "METEU_ESSA"
-  "DE_QUALQUER_JEITO"
-  "AI_TU_ME_QUEBRA"
   "TOMA"
-  "JA_VAI"
-  "PERAI"
 ] @keyword.control
 
 (type) @type
