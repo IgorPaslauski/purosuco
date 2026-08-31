@@ -1,4 +1,4 @@
-name = "purosuco"
+name = "PuroSuco"
 grammar = "purosuco"
 path_suffixes = ["suco"]
 line_comments = ["// "]
